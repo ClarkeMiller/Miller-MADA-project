@@ -18,8 +18,8 @@ This uses MS Word as output format. [See here](https://quarto.org/docs/output-fo
 
 ```{r, echo=FALSE, message=FALSE}
 # load a few R packages
-library(here)
-library(knitr)
+suppressPackageStartupMessages(library(here))
+suppressPackageStartupMessages(library(knitr))
 ```
 
 # Summary/Abstract
@@ -30,33 +30,28 @@ library(knitr)
 
 ## General Background Information
 
-According to data provided by the World Health organization, seasonal respiratory illnesses are linked to over 650,000 deaths each year worldwide.  In the United States the flu is responsible for approximately 42,000 deaths per year and ranks 13th most frequent cause of death.  
+According to data provided by the World Health organization, seasonal respiratory illnesses are linked to over 650,000 deaths each year worldwide. In the United States the flu is responsible for approximately 42,000 deaths per year and ranks 13th most frequent cause of death.
 
 ## Description of data and data source
 
-Detailed data on covid and flu strains, outbreaks, and general epidemiological information is available via several sources. Data on these infectious diseases is available from sites such as GISAID (<https://gisaid.org/>) and the Global Health Data Exchange (<https://ghdx.healthdata.org/>).  These databases are highly detailed and can provide data that includes information about lineage and geographic data. (See Figure 1 Below.) 
+Detailed data on covid and flu strains, outbreaks, and general epidemiological information is available via several sources. Data on these infectious diseases is available from sites such as GISAID (<https://gisaid.org/>) and the Global Health Data Exchange (<https://ghdx.healthdata.org/>). These databases are highly detailed and can provide data that includes information about lineage and geographic data. (See Figure 1 Below.)
 
 ```{r}
 
 #| label: fig-schematic
 #| fig-cap: "Figure 1: World Flu Burden by Clade."
 #| echo: FALSE
-knitr::include_graphics(here("products","assets","World Flu by Cladep.png"))
+knitr::include_graphics(here("assets","World Flu by Cladep.png"))
 
 ```
-
-
 
 ## Questions/Hypotheses to be addressed
 
 *State the research questions you plan to answer with this analysis.*
 
-The research questions that i would like to answer are:
-1. Can the progression of flu outbreaks be traced geographically and temporally over the course of a year?
-2. Is there a specific location from which the annual predominant strain of flu originates?
-3. If a pattern can be established, does it repeat on a yearly basis?  Does the pattern shift from year to year?  Can other factors, such as weather, account for any changes to this pattern?
+The research questions that i would like to answer are: 1. Can the progression of flu outbreaks be traced geographically and temporally over the course of a year? 2. Is there a specific location from which the annual predominant strain of flu originates? 3. If a pattern can be established, does it repeat on a yearly basis? Does the pattern shift from year to year? Can other factors, such as weather, account for any changes to this pattern?
 
-Note:  I am certain that efforts like this already exist.  My purpose for this project is to use it as a learning tool and to see if I can relicate those prior efforts.
+Note: I am certain that efforts like this already exist. My purpose for this project is to use it as a learning tool and to see if I can relicate those prior efforts.
 
 {{< pagebreak >}}
 
@@ -72,16 +67,122 @@ Sometimes you might want to show a schematic diagram/figure that was not created
 #| label: fig-schematic
 #| fig-cap: "A figure that is manually generated and shows some overview/schematic. This has nothing to do with the data, it's just a random one from one of our projects I found and placed here."
 #| echo: FALSE
-knitr::include_graphics(here("products","assets","antigen-recognition.png"))
+knitr::include_graphics(here("assets","antigen-recognition.png"))
 ```
 
 ## Data aquisition
 
-*As applicable, explain where and how you got the data. If you directly import the data from an online source, you can combine this section with the next.*
+Data was acquired from the World Health Organization Global Influenza Programme. The data includes the excel files containing raw data (VIW_FNT_CM.xlsx) and a file containing the legend for the data (VIW_FLU_METADATA.csv).
 
 ## Data import and cleaning
 
-*Write code that reads in the file and cleans it so it's ready for analysis. Since this will be fairly long code for most datasets, it might be a good idea to have it in one or several R scripts. If that is the case, explain here briefly what kind of cleaning/processing you do, and provide more details and well documented code somewhere (e.g. as supplement in a paper). All materials, including files that contain code, should be commented well so everyone can follow along.*
+```{r}
+#Call a bunch of libraries.
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(broom)) 
+suppressPackageStartupMessages(library(here))
+suppressPackageStartupMessages(library(readxl)) 
+suppressPackageStartupMessages(library(dplyr)) 
+suppressPackageStartupMessages(library(tidyr)) 
+suppressPackageStartupMessages(library(skimr))
+suppressPackageStartupMessages(library(gt))
+suppressPackageStartupMessages(library(dslabs))
+suppressPackageStartupMessages(library(plotly))
+suppressPackageStartupMessages(library(gapminder))
+
+#Load excel data file
+#Data file from WHO "VIW_FNT_CM.xlsx"
+
+data_location <- here::here("data","raw-data","VIW_FNT_CM.xlsx")
+WHO_data_flu <- readxl::read_excel(data_location)
+
+
+#Save a rds version
+save_data_location <- here::here("data","raw-data","VIW_FNT_CM.rds")
+saveRDS(WHO_data_flu, file = save_data_location)
+
+#Take a squinty
+dplyr::glimpse(WHO_data_flu)
+summary(WHO_data_flu)
+head(WHO_data_flu)
+skimr::skim(WHO_data_flu)
+class(WHO_data_flu $Location)
+
+```
+
+```{r}
+#Wow.  That's a lot of data.
+
+#Okay, let's filter the data a bit.  I am still working out what my final analysis will look like and, frankly, doubting my coding abilities to produce a meaningful analysis.  That being said, let's take a look.  
+
+#For example, we might want to look at the total flu cases compared to the number of total cases of the A strains and the total number of the B strains in countries such as China, Australia, Canada, and France. So we filter!
+
+
+WHO_data_flu <- WHO_data_flu %>% 
+  select(MMWR_WEEKSTARTDATE, COUNTRY_AREA_TERRITORY, INF_ALL, INF_A, INF_B)
+
+# Plot the data using a layered bar graph
+ggplot(WHO_data_flu, aes(x = MMWR_WEEKSTARTDATE)) +
+  geom_bar(aes(y = INF_ALL, fill = "INF_ALL"), stat = "identity", color="black", position = "stack") + 
+  geom_bar(aes(y = INF_A, fill = "INF_A"), stat = "identity", color="black", position = "stack") + 
+  geom_bar(aes(y = INF_B, fill = "INF_B"), stat = "identity", color="black", position = "stack") + 
+  labs(title = "Influenza Cases Reported to WHO",
+       subtitle = "Country = all, 1995-2024 Season",
+       x = "Week",
+       y = "Number of Positive Specimens",
+       fill = "Influenza Type") + 
+  theme_minimal()
+
+```
+
+```{r}
+
+WHO_data_flu1 <- WHO_data_flu %>% filter(COUNTRY_AREA_TERRITORY == "China")
+WHO_data_flu1 <- WHO_data_flu1 %>% filter(COUNTRY_AREA_TERRITORY == "China")
+WHO_data_flu1 <- na.omit(WHO_data_flu1)
+
+library(gt)
+WHO_data_flu1 |> 
+  gt() 
+
+# Plot the data using a layered bar graph
+ggplot(WHO_data_flu1, aes(x = MMWR_WEEKSTARTDATE)) +
+  geom_bar(aes(y = INF_ALL, fill = "INF_ALL"), stat = "identity", color="black", position = "stack") + 
+  geom_bar(aes(y = INF_A, fill = "INF_A"), stat = "identity", color="black", position = "stack") + 
+  geom_bar(aes(y = INF_B, fill = "INF_B"), stat = "identity", color="black", position = "stack") + 
+  labs(title = "Influenza Cases Reported to WHO",
+       subtitle = "Country = China, 2005-2024 Seasons",
+       x = "Week",
+       y = "Number of Positive Specimens",
+       fill = "Influenza Type") + 
+  theme_minimal()
+
+#That's still a LOT of data.  Notice the big gap around 2020-2022.  That is due to the restrictions imposed by the COVID pandemic.  Let's narrow this down to a more reasonable range... say to the beginning of the 2023-2024 flu season.
+
+WHO_data_flu2 <- WHO_data_flu1 %>% filter(MMWR_WEEKSTARTDATE > '2023-10-01')
+WHO_data_flu2 <- WHO_data_flu2 %>% filter(MMWR_WEEKSTARTDATE > '2023-10-01')
+WHO_data_flu2 <- na.omit(WHO_data_flu2)
+
+library(gt)
+WHO_data_flu2 |> 
+  gt() 
+
+# Plot the data using a layered bar graph
+ggplot(WHO_data_flu2, aes(x = MMWR_WEEKSTARTDATE)) +
+  geom_bar(aes(y = INF_ALL, fill = "INF_ALL"), stat = "identity", color="black", position = "stack") + 
+  geom_bar(aes(y = INF_A, fill = "INF_A"), stat = "identity", color="black", position = "stack") + 
+  geom_bar(aes(y = INF_B, fill = "INF_B"), stat = "identity", color="black", position = "stack") + 
+  labs(title = "Influenza Cases Reported to WHO",
+       subtitle = "Country = China, 2022-2024 Seasons",
+       x = "Week",
+       y = "Number of Positive Specimens",
+       fill = "Influenza Type") + 
+  theme_minimal()
+
+
+
+```
 
 ## Statistical analysis
 
