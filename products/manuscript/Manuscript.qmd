@@ -8,8 +8,8 @@ format:
     toc: false
     number-sections: true
     highlight-style: github
-bibliography: ../assets/dataanalysis-references.bib
-csl: ../assets/apa.csl
+bibliography: ../../assets/dataanalysis-references.bib
+csl: ../../assets/apa.csl
 ---
 
 The structure below is one possible setup for a data analysis project (including the course project). For a manuscript, adjust as needed. You don't need to have exactly these sections, but the content covering those sections should be addressed.
@@ -111,19 +111,19 @@ class(WHO_data_flu $Location)
 
 ```
 
+
+Wow.  That's a lot of data.  Okay, let's filter the data a bit.  I am still working out what my final analysis will look like and, frankly, doubting my coding abilities to produce a meaningful analysis.  That being said, let's take a look.  
+
+For example, we might want to look at the total flu cases compared to the number of total cases of the A strains and the total number of the B strains in countries such as China, Australia, Canada, and France. So we filter!
+
 ```{r}
-#Wow.  That's a lot of data.
-
-#Okay, let's filter the data a bit.  I am still working out what my final analysis will look like and, frankly, doubting my coding abilities to produce a meaningful analysis.  That being said, let's take a look.  
-
-#For example, we might want to look at the total flu cases compared to the number of total cases of the A strains and the total number of the B strains in countries such as China, Australia, Canada, and France. So we filter!
-
 
 WHO_data_flu <- WHO_data_flu %>% 
   select(MMWR_WEEKSTARTDATE, COUNTRY_AREA_TERRITORY, INF_ALL, INF_A, INF_B)
 
+
 # Plot the data using a layered bar graph
-ggplot(WHO_data_flu, aes(x = MMWR_WEEKSTARTDATE)) +
+plot1 <- ggplot(WHO_data_flu, aes(x = MMWR_WEEKSTARTDATE)) +
   geom_bar(aes(y = INF_ALL, fill = "INF_ALL"), stat = "identity", color="black", position = "stack") + 
   geom_bar(aes(y = INF_A, fill = "INF_A"), stat = "identity", color="black", position = "stack") + 
   geom_bar(aes(y = INF_B, fill = "INF_B"), stat = "identity", color="black", position = "stack") + 
@@ -133,6 +133,14 @@ ggplot(WHO_data_flu, aes(x = MMWR_WEEKSTARTDATE)) +
        y = "Number of Positive Specimens",
        fill = "Influenza Type") + 
   theme_minimal()
+
+plot1save = here("assets", "plot1.png")
+ggsave(plot1save, plot1, width = 10, height = 6, dpi = 300)
+
+#| label: fig-schematic
+#| fig-cap: "Figure 2: World Flu Burden by Year."
+#| echo: FALSE
+knitr::include_graphics(here("assets","plot1.png"))
 
 ```
 
@@ -147,7 +155,7 @@ WHO_data_flu1 |>
   gt() 
 
 # Plot the data using a layered bar graph
-ggplot(WHO_data_flu1, aes(x = MMWR_WEEKSTARTDATE)) +
+plot2 <- ggplot(WHO_data_flu1, aes(x = MMWR_WEEKSTARTDATE)) +
   geom_bar(aes(y = INF_ALL, fill = "INF_ALL"), stat = "identity", color="black", position = "stack") + 
   geom_bar(aes(y = INF_A, fill = "INF_A"), stat = "identity", color="black", position = "stack") + 
   geom_bar(aes(y = INF_B, fill = "INF_B"), stat = "identity", color="black", position = "stack") + 
@@ -158,8 +166,18 @@ ggplot(WHO_data_flu1, aes(x = MMWR_WEEKSTARTDATE)) +
        fill = "Influenza Type") + 
   theme_minimal()
 
-#That's still a LOT of data.  Notice the big gap around 2020-2022.  That is due to the restrictions imposed by the COVID pandemic.  Let's narrow this down to a more reasonable range... say to the beginning of the 2023-2024 flu season.
+plot2save = here("assets", "plot2.png")
+ggsave(plot2save, plot2, width = 10, height = 6, dpi = 300)
 
+#| label: fig-schematic
+#| fig-cap: "Figure 3: World Flu Burden by Year for China Since Reporting Began."
+#| echo: FALSE
+knitr::include_graphics(here("assets","plot2.png"))
+```
+
+That's still a LOT of data.  Notice the big gap around 2020-2022.  That is due to the restrictions imposed by the COVID pandemic.  Let's narrow this down to a more reasonable range... say to the beginning of the 2023-2024 flu season.
+
+```{r}
 WHO_data_flu2 <- WHO_data_flu1 %>% filter(MMWR_WEEKSTARTDATE > '2023-10-01')
 WHO_data_flu2 <- WHO_data_flu2 %>% filter(MMWR_WEEKSTARTDATE > '2023-10-01')
 WHO_data_flu2 <- na.omit(WHO_data_flu2)
@@ -169,7 +187,7 @@ WHO_data_flu2 |>
   gt() 
 
 # Plot the data using a layered bar graph
-ggplot(WHO_data_flu2, aes(x = MMWR_WEEKSTARTDATE)) +
+plot3 <- ggplot(WHO_data_flu2, aes(x = MMWR_WEEKSTARTDATE)) +
   geom_bar(aes(y = INF_ALL, fill = "INF_ALL"), stat = "identity", color="black", position = "stack") + 
   geom_bar(aes(y = INF_A, fill = "INF_A"), stat = "identity", color="black", position = "stack") + 
   geom_bar(aes(y = INF_B, fill = "INF_B"), stat = "identity", color="black", position = "stack") + 
@@ -180,7 +198,13 @@ ggplot(WHO_data_flu2, aes(x = MMWR_WEEKSTARTDATE)) +
        fill = "Influenza Type") + 
   theme_minimal()
 
+plot3save = here("assets", "plot3.png")
+ggsave(plot3save, plot3, width = 10, height = 6, dpi = 300)
 
+#| label: fig-schematic
+#| fig-cap: "Figure 4: World Flu Burden by Year."
+#| echo: FALSE
+knitr::include_graphics(here("assets","plot3.png"))
 
 ```
 
@@ -198,13 +222,13 @@ ggplot(WHO_data_flu2, aes(x = MMWR_WEEKSTARTDATE)) +
 
 @tbl-summarytable shows a summary of the data.
 
-Note the loading of the data providing a **relative** path using the `../../` notation. (Two dots means a folder up). You never want to specify an **absolute** path like `C:\ahandel\myproject\results\` because if you share this with someone, it won't work for them since they don't have that path. You can also use the `here` R package to create paths. See examples of that below.
+Note the loading of the data providing a **relative** path using the `../../` notation. (Two dots means a folder up). You never want to specify an **absolute** path like `C:\ahandel\myproject\results\` because if you share this with someone, it won't work for them since they don't have that path. You can also use the `here` R package to create paths. See examples of that below. I generally recommend the `here` package.
 
 ```{r}
 #| label: tbl-summarytable
 #| tbl-cap: "Data summary table."
 #| echo: FALSE
-resulttable=readRDS("../../results/summarytable.rds")
+resulttable=readRDS("../../results/tables/summarytable.rds")
 knitr::kable(resulttable)
 ```
 
@@ -218,7 +242,7 @@ knitr::kable(resulttable)
 #| label: fig-result
 #| fig-cap: "Height and weight stratified by gender."
 #| echo: FALSE
-knitr::include_graphics(here("results","height-weight-stratified.png"))
+knitr::include_graphics(here("results","figures","height-weight-stratified.png"))
 ```
 
 ## Full analysis
@@ -231,7 +255,7 @@ Example @tbl-resulttable2 shows a summary of a linear model fit.
 #| label: tbl-resulttable2
 #| tbl-cap: "Linear model fit table."
 #| echo: FALSE
-resulttable2 = readRDS(here("results","tables-files","resulttable2.rds"))
+resulttable2 = readRDS(here("results","tables","resulttable2.rds"))
 knitr::kable(resulttable2)
 ```
 
@@ -257,7 +281,7 @@ This paper [@leek2015] discusses types of analyses.
 
 These papers [@mckay2020; @mckay2020a] are good examples of papers published using a fully reproducible setup similar to the one shown in this template.
 
-Note that this cited reference will show up at the end of the document, the reference formatting is determined by the CSL file specified in the YAML header. Many more style files for almost any journal [are available](https://www.zotero.org/styles). You also specify the location of your bibtex reference file in the YAML. You can call your reference file anything you like, I just used the generic word `references.bib` but giving it a more descriptive name is probably better.
+Note that this cited reference will show up at the end of the document, the reference formatting is determined by the CSL file specified in the YAML header. Many more style files for almost any journal [are available](https://www.zotero.org/styles). You also specify the location of your bibtex reference file in the YAML. You can call your reference file anything you like.
 
 {{< pagebreak >}}
 
