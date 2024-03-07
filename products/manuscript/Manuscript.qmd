@@ -111,8 +111,7 @@ class(WHO_data_flu $Location)
 
 ```
 
-
-Wow.  That's a lot of data.  Okay, let's filter the data a bit.  I am still working out what my final analysis will look like and, frankly, doubting my coding abilities to produce a meaningful analysis.  That being said, let's take a look.  
+Wow. That's a lot of data. Okay, let's filter the data a bit. I am still working out what my final analysis will look like and, frankly, doubting my coding abilities to produce a meaningful analysis. That being said, let's take a look.
 
 For example, we might want to look at the total flu cases compared to the number of total cases of the A strains and the total number of the B strains in countries such as China, Australia, Canada, and France. So we filter!
 
@@ -175,7 +174,7 @@ ggsave(plot2save, plot2, width = 10, height = 6, dpi = 300)
 knitr::include_graphics(here("assets","plot2.png"))
 ```
 
-That's still a LOT of data.  Notice the big gap around 2020-2022.  That is due to the restrictions imposed by the COVID pandemic.  Let's narrow this down to a more reasonable range... say to the beginning of the 2023-2024 flu season.
+That's still a LOT of data. Notice the big gap around 2020-2022. That is due to the restrictions imposed by the COVID pandemic. Let's narrow this down to a more reasonable range... say to the beginning of the 2023-2024 flu season.
 
 ```{r}
 WHO_data_flu2 <- WHO_data_flu1 %>% filter(MMWR_WEEKSTARTDATE > '2023-10-01')
